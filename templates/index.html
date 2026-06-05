@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AW Client Report Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .premium-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl premium-shadow overflow-hidden">
+        <div class="bg-blue-900 p-6 text-white">
+            <h1 class="text-3xl font-bold">AW Client Report Portal</h1>
+            <p class="text-blue-200 mt-2">Generate quarterly SACS & TCC reports</p>
+        </div>
+
+        <!-- Client Selector Form -->
+        <div class="bg-gray-100 p-6 border-b flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h2 class="font-bold text-gray-700">Load Client Profile</h2>
+                <p class="text-sm text-gray-500">Populate static data from the database.</p>
+            </div>
+            <form method="GET" action="/" class="flex gap-4">
+                <select name="client_id" class="border rounded-lg p-2 bg-white" required>
+                    <option value="">Select a client...</option>
+                    {% for client in all_clients %}
+                    <option value="{{ client.id }}" {% if selected_client and selected_client.id == client.id %}selected{% endif %}>{{ client.client_name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">Load Client</button>
+            </form>
+        </div>
+        
+        <form id="reportForm" class="p-8 space-y-8">
+            <!-- Client Info -->
+            <section>
+                <h2 class="text-xl font-semibold border-b pb-2 mb-4">Client Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Client Name</label>
+                        <input type="text" id="client_name" class="w-full border rounded-lg p-2 {% if selected_client %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}" required value="{{ selected_client.client_name if selected_client else '' }}" {% if selected_client %}readonly{% endif %}>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SACS Inputs -->
+            <section>
+                <h2 class="text-xl font-semibold border-b pb-2 mb-4">SACS (Cashflow) Data</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Inflow Amount ($)</label>
+                        <input type="number" id="inflow_amount" class="w-full border rounded-lg p-2 {% if selected_client %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}" required value="{{ selected_client.inflow_amount if selected_client else '' }}" {% if selected_client %}readonly{% endif %}>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Outflow Amount ($)</label>
+                        <input type="number" id="outflow_amount" class="w-full border rounded-lg p-2 {% if selected_client %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}" required value="{{ selected_client.outflow_amount if selected_client else '' }}" {% if selected_client %}readonly{% endif %}>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Insurance Deductibles ($)</label>
+                        <input type="number" id="insurance_deductibles" class="w-full border rounded-lg p-2 {% if selected_client %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}" required value="{{ selected_client.insurance_deductibles if selected_client else '' }}" {% if selected_client %}readonly{% endif %}>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TCC Inputs -->
+            <section>
+                <h2 class="text-xl font-semibold border-b pb-2 mb-4">TCC (Net Worth) Data</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">Trust Value (Primary Residence) ($)</label>
+                    <input type="number" id="trust_value" class="w-full border rounded-lg p-2 max-w-xs" required value="450000">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Client 1 Retirement -->
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <h3 class="font-medium mb-2">Client 1 Retirement</h3>
+                        <div id="c1_ret_list" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" class="border p-2 rounded w-1/2" placeholder="Account Name" value="IRA">
+                                <input type="number" class="border p-2 rounded w-1/2" placeholder="Balance" value="11000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Client 2 Retirement -->
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <h3 class="font-medium mb-2">Client 2 Retirement</h3>
+                        <div id="c2_ret_list" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" class="border p-2 rounded w-1/2" placeholder="Account Name" value="Roth IRA">
+                                <input type="number" class="border p-2 rounded w-1/2" placeholder="Balance" value="15000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Non-Retirement -->
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <h3 class="font-medium mb-2">Non-Retirement Accounts</h3>
+                        <div id="non_ret_list" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" class="border p-2 rounded w-1/2" placeholder="Account Name" value="Brokerage">
+                                <input type="number" class="border p-2 rounded w-1/2" placeholder="Balance" value="50000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liabilities -->
+                    <div class="border rounded-lg p-4 bg-gray-50">
+                        <h3 class="font-medium mb-2">Liabilities</h3>
+                        <div id="liab_list" class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="text" class="border p-2 rounded w-1/2" placeholder="Account Name" value="Mortgage">
+                                <input type="number" class="border p-2 rounded w-1/2" placeholder="Balance" value="200000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="flex justify-end pt-4">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                    Generate PDF Report
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function getDictFromList(containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.flex');
+            let dict = {};
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if(inputs[0].value && inputs[1].value) {
+                    dict[inputs[0].value] = parseFloat(inputs[1].value);
+                }
+            });
+            return dict;
+        }
+
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const payload = {
+                client_name: document.getElementById('client_name').value,
+                inflow_amount: parseFloat(document.getElementById('inflow_amount').value),
+                outflow_amount: parseFloat(document.getElementById('outflow_amount').value),
+                insurance_deductibles: parseFloat(document.getElementById('insurance_deductibles').value),
+                trust_value: parseFloat(document.getElementById('trust_value').value),
+                retirement_client_1: getDictFromList('c1_ret_list'),
+                retirement_client_2: getDictFromList('c2_ret_list'),
+                non_retirement: getDictFromList('non_ret_list'),
+                liabilities: getDictFromList('liab_list')
+            };
+
+            const btn = e.target.querySelector('button');
+            btn.innerText = "Generating...";
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    alert('Error generating report.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error.');
+            } finally {
+                btn.innerText = "Generate PDF Report";
+            }
+        });
+    </script>
+</body>
+</html>

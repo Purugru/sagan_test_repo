@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+pydantic
+xhtml2pdf
+jinja2

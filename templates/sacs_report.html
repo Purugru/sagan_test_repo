@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SACS Report - {{ client_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            @page {
+                size: landscape;
+                margin: 0.5cm;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8 print:p-0 print:bg-white font-sans text-blue-900">
+    
+    <!-- Top Action Bar (Hidden in Print) -->
+    <div class="no-print mb-8 flex justify-end">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow-lg transition">
+            Download PDF
+        </button>
+    </div>
+
+    <!-- Main Page Container -->
+    <div class="max-w-5xl mx-auto bg-white p-12 print:p-0 shadow-xl border border-gray-200 print:shadow-none print:border-none relative overflow-hidden">
+        
+        <!-- Top Left Annotations -->
+        <div class="absolute top-12 left-12 text-green-600 font-bold leading-tight">
+            <div class="text-xl">{{ client_name }}</div>
+            <div class="text-lg">${{ "{:,.2f}".format(inflow_amount) }} / mo</div>
+        </div>
+
+        <!-- Diagram Container -->
+        <div class="mt-24 relative w-full h-[500px]">
+            
+            <!-- Inflow Circle (Top Left) -->
+            <div class="absolute top-0 left-0 w-48 h-48 bg-green-500 rounded-full flex flex-col justify-center items-center text-white shadow-md z-10">
+                <span class="font-bold text-lg tracking-wider mb-3">INFLOW</span>
+                <div class="bg-white text-gray-900 font-bold px-4 py-1.5 rounded text-lg w-32 text-center shadow-inner">
+                    ${{ "{:,.0f}".format(inflow_amount) }}
+                </div>
+                <span class="absolute bottom-5 text-xs font-bold">$1,000 Floor</span>
+            </div>
+
+            <!-- Outflow Circle (Top Right) -->
+            <div class="absolute top-0 right-0 w-48 h-48 bg-red-500 rounded-full flex flex-col justify-center items-center text-white shadow-md z-10">
+                <span class="font-bold text-lg tracking-wider mb-3">OUTFLOW</span>
+                <div class="bg-white text-gray-900 font-bold px-4 py-1.5 rounded text-lg w-32 text-center shadow-inner">
+                    ${{ "{:,.0f}".format(outflow_amount) }}
+                </div>
+                <span class="absolute bottom-5 text-xs font-bold">$1,000 Floor</span>
+            </div>
+
+            <!-- Private Reserve Circle (Bottom Center) -->
+            <div class="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-900 rounded-full flex flex-col justify-center items-center text-white shadow-md z-10">
+                <span class="font-bold text-base tracking-wider mb-1 text-center px-4">PRIVATE RESERVE</span>
+                <span class="text-5xl mt-2">🐖</span>
+            </div>
+
+            <!-- Connecting Arrow: Inflow -> Outflow -->
+            <div class="absolute top-24 left-48 right-48 h-1 bg-red-500 z-0">
+                <!-- Arrowhead -->
+                <div class="absolute -right-1 -top-2 w-0 h-0 border-t-8 border-b-8 border-l-[12px] border-t-transparent border-b-transparent border-l-red-500"></div>
+                <!-- Label -->
+                <div class="absolute -top-12 left-1/2 -translate-x-1/2 text-center w-64">
+                    <div class="text-red-500 font-bold text-lg">X = ${{ "{:,.0f}".format(outflow_amount) }}/month</div>
+                    <div class="text-gray-600 text-xs mt-1">Automated transfer on the 28th</div>
+                </div>
+            </div>
+
+            <!-- Connecting Arrow: Inflow -> Private Reserve (Elbow) -->
+            <div class="absolute top-48 left-24 w-1/4 h-32 border-l-4 border-b-4 border-blue-900 rounded-bl-3xl z-0">
+                <!-- Arrowhead -->
+                <div class="absolute -right-2 -bottom-2.5 w-0 h-0 border-t-8 border-b-8 border-l-[12px] border-t-transparent border-b-transparent border-l-blue-900"></div>
+                <!-- Label -->
+                <div class="absolute bottom-2 left-6 text-blue-900 font-bold text-lg">
+                    ${{ "{:,.0f}".format(sacs_excess) }}/month
+                </div>
+            </div>
+
+            <!-- Footer Line from Private Reserve -->
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 h-20 border-l-2 border-dashed border-blue-900 z-0">
+                <div class="absolute top-4 left-4 text-blue-900 font-bold text-xs whitespace-nowrap">
+                    MONTHLY CASHFLOW
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer Header -->
+        <div class="text-center mt-6">
+            <h2 class="text-2xl font-bold text-blue-900 uppercase tracking-wide">
+                Simple Automated Cashflow System (SACS)
+            </h2>
+        </div>
+
+    </div>
+
+    <!-- Page 2 Container (FICA and Investment Accounts) -->
+    <div class="max-w-5xl mx-auto bg-white p-12 print:p-0 shadow-xl border border-gray-200 print:shadow-none print:border-none relative mt-12 print:mt-0 print:break-before-page h-[600px] flex flex-col items-center pt-16 overflow-hidden">
+        
+        <!-- Dotted Line From Top -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 h-64 border-l-2 border-dashed border-blue-900 z-0"></div>
+        
+        <!-- Header over dotted line -->
+        <div class="relative bg-white px-6 py-2 text-center z-10 mb-8 mt-4">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-wide">Simple Automated Cashflow System (SACS)</h2>
+        </div>
+        
+        <!-- Thick Horizontal Arrow Container -->
+        <div class="absolute top-64 left-1/2 -translate-x-1/2 flex items-center justify-center w-72 z-0 mt-4">
+            <!-- Left Arrowhead -->
+            <div class="w-0 h-0 border-t-[20px] border-b-[20px] border-r-[24px] border-t-transparent border-b-transparent border-r-[#60a5fa] drop-shadow-md"></div>
+            <!-- Body -->
+            <div class="h-14 bg-[#60a5fa] flex-grow border-y-2 border-blue-900 drop-shadow-md"></div>
+            <!-- Right Arrowhead -->
+            <div class="w-0 h-0 border-t-[20px] border-b-[20px] border-l-[24px] border-t-transparent border-b-transparent border-l-[#60a5fa] drop-shadow-md"></div>
+        </div>
+
+        <!-- Circles Container -->
+        <div class="absolute top-48 left-0 w-full flex justify-center gap-16 z-10">
+            
+            <!-- FICA Account (Private Reserve) -->
+            <div class="flex flex-col items-center">
+                <div class="w-64 h-64 bg-[#93c5fd] rounded-full flex flex-col justify-center items-center shadow-xl border-[3px] border-blue-900">
+                    <span class="font-bold text-2xl tracking-wider mb-4 text-white drop-shadow-lg text-center">FICA<br>ACCOUNT</span>
+                    <div class="bg-white text-[#93c5fd] font-bold px-4 py-2 rounded text-xl w-36 text-center shadow-inner mt-2">
+                        ${{ "{:,.0f}".format(private_reserve_target) }}
+                    </div>
+                </div>
+                <span class="mt-4 text-[11px] font-bold text-gray-600">6X Monthly Expenses + Deductibles</span>
+            </div>
+
+            <!-- Investment Account -->
+            <div class="flex flex-col items-center">
+                <div class="w-64 h-64 bg-[#1e3a8a] rounded-full flex flex-col justify-center items-center shadow-xl border-[3px] border-[#0f172a]">
+                    <span class="font-bold text-2xl tracking-wider mb-4 text-white drop-shadow-lg text-center">INVESTMENT<br>ACCOUNT</span>
+                    <div class="bg-white text-gray-900 font-bold px-4 py-2 rounded text-xl w-36 text-center shadow-inner mt-2">
+                        ${{ "{:,.0f}".format(sacs_excess - private_reserve_target) if (sacs_excess - private_reserve_target) > 0 else 0 }}+
+                    </div>
+                </div>
+                <span class="mt-4 text-[11px] font-bold text-gray-600">Remainder</span>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
