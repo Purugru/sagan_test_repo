@@ -1,8 +1,8 @@
-# AW Client Report Portal - 2-Hour MVP
+# AW Client Report Portal - Working Prototype
 
-This prototype demonstrates the core pipeline of taking raw financial inputs, performing complex internal deterministic math, and generating the SACS and TCC PDF reports. 
+This prototype demonstrates the complete full-stack pipeline of taking raw financial inputs, pulling static client data from a database, performing complex internal deterministic math, and generating the SACS and TCC PDF reports via a browser-native print strategy. 
 
-As per the technical limitations of a 2-hour scope, this prototype deliberately bypasses persistent SQLite database storage (Client Management CRUD) to focus entirely on the highest-value core feature: the math and the PDF output.
+We have implemented a local SQLite database (`db.sqlite`) to securely store client profiles, allowing the team to quickly load existing clients without re-entering static info (like salaries and deductibles) every quarter.
 
 ## How to Run the Demo
 
@@ -26,12 +26,12 @@ python -m venv venv
 ```bash
 pip install -r requirements.txt
 ```
-*(Note: WeasyPrint might require additional system dependencies on Windows/macOS. E.g., GTK3. If you encounter a WeasyPrint error on Windows, you may need to install the [GTK3 runtime](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases) first.)*
 
 ### 4. Run the Server
 ```bash
 uvicorn main:app --reload
 ```
+*Note: The server includes a startup event that automatically creates the `db.sqlite` database and seeds it with two dummy clients on the first run!*
 
 ### 5. Access the Portal
 Open your browser and navigate to `http://127.0.0.1:8000`. You will see the structured form with pre-populated dummy data. Click **Generate PDF Report** at the bottom to download the automatically generated SACS and TCC PDF files!

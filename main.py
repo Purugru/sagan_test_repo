@@ -48,8 +48,23 @@ class ReportRequest(BaseModel):
     liabilities: Dict[str, float]
 
 @app.get("/", response_class=HTMLResponse)
-async def get_index(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html")
+async def get_index(request: Request, client_id: Optional[int] = None):
+    conn = sqlite3.connect("db.sqlite")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT * FROM clients')
+    all_clients = [dict(row) for row in cursor.fetchall()]
+    
+    selected_client = None
+    if client_id:
+        cursor.execute('SELECT * FROM clients WHERE id = ?', (client_id,))
+        row = cursor.fetchone()
+        if row:
+            selected_client = dict(row)
+    conn.close()
+    
+    return templates.TemplateResponse(request=request, name="index.html", context={"all_clients": all_clients, "selected_client": selected_client})
 
 @app.post("/generate")
 async def generate_report(request: Request, data: ReportRequest):
