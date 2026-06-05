@@ -22,14 +22,19 @@
                 <h2 class="font-bold text-gray-700">Load Client Profile</h2>
                 <p class="text-sm text-gray-500">Populate static data from the database.</p>
             </div>
-            <form method="GET" action="/" class="flex gap-4">
-                <select name="client_id" class="border rounded-lg p-2 bg-white" required>
+            <form method="GET" action="/" class="flex gap-4 items-center">
+                <select name="client_id" class="border rounded-lg p-2 bg-white">
                     <option value="">Select a client...</option>
                     {% for client in all_clients %}
                     <option value="{{ client.id }}" {% if selected_client and selected_client.id == client.id %}selected{% endif %}>{{ client.client_name }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">Load Client</button>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">Load</button>
+                    {% if selected_client %}
+                    <a href="/" class="bg-gray-400 text-white px-4 py-2 rounded-lg font-bold hover:bg-gray-500 transition">Clear</a>
+                    {% endif %}
+                </div>
             </form>
         </div>
         
