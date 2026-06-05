@@ -1,5 +1,4 @@
 fastapi
 uvicorn
-pydantic
-xhtml2pdf
 jinja2
+python-multipart
