@@ -24,15 +24,6 @@ def startup_event():
             insurance_deductibles REAL
         )
     ''')
-    cursor.execute('SELECT COUNT(*) FROM clients')
-    if cursor.fetchone()[0] == 0:
-        cursor.executemany('''
-            INSERT INTO clients (client_name, inflow_amount, outflow_amount, insurance_deductibles)
-            VALUES (?, ?, ?, ?)
-        ''', [
-            ('John & Jane Doe', 15000, 11000, 2000),
-            ('The Smith Family', 22000, 16000, 1500)
-        ])
     conn.commit()
     conn.close()
 
